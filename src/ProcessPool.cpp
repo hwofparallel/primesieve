@@ -38,6 +38,14 @@ ProcessPool* ProcessPool::createPool(int number) {
     return &instance;
 }
 
+Process* ProcessPool::getSubProcess() {
+    return sub_process;
+}
+
+int ProcessPool::getIndex() {
+    return index;
+}
+
 ProcessPool::~ProcessPool() {
   delete []sub_process;
 }
