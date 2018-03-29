@@ -6,7 +6,7 @@
 //  singleton pattern
 class ProcessPool {
 public:
-	static ProcessPool * creatPool(int number);
+	static ProcessPool * createPool(int number);
 	~ProcessPool();
 	int getIndex() {
 		return index;	
