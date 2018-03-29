@@ -33,13 +33,10 @@ void changeAllMultiples(vector<bool>& prime, int father_range, int process_numbe
         loc = i;
         if (prime[i]) {
             for (int j = 0; j < process_number; j++) {
-              write(pool->getSubProcess()[j].getfiledes()[1], &loc, 4);
+                write(pool->getSubProcess()[j].getfiledes()[1], &loc, 4);
             }
-            loc = i + i;
-            while (loc < father_range) {
-                  prime[loc] = false;
-                  loc += i;
-            }
+            for (loc = i + i; loc < father_range; loc += i)
+                prime[loc] = false;
         }
     }
 }
@@ -48,8 +45,8 @@ void primeSieve(int number) {
     int total = pow(2, number) * 1000;
     int process_number = sqrt(total) / 2;
     static ProcessPool* mypool = ProcessPool::createPool(process_number);
-
-    if (mypool->getIndex() < 0) {
+    int index = mypool->getIndex();
+    if (index < 0) {
         //这个进程代表的是父进程
         int father_range = total / (process_number + 1) + total % (process_number + 1) + 1;
         vector<bool> prime(father_range, true);
@@ -61,24 +58,21 @@ void primeSieve(int number) {
         //   描述符引用计数记录着共享着的进程个数，当父进程或某一子进程close掉套接字时，描述符引用计数会相应的减一，
         //   当引用计数仍大于零时，这个close调用就不会引发TCP的四路握手断连过程。
         //   close成功为0,出错为-1
-        for (int i = 0; i < process_number; i++) {
-          close(mypool->getSubProcess()[i].getfiledes()[1]);
-        }
+        for (int i = 0; i < process_number; i++)
+            close(mypool->getSubProcess()[i].getfiledes()[1]);
 
         //  等待所有的子进程全部结束
-        int processId = mypool->getIndex() + process_number + 1;
+        int processId = index + process_number + 1;
         clock_t begin = mypool->getSubProcess()[processId].getBeginTime();
-        printResult(prime, -1, 0, begin);
-    //  计算并且打印总时间
+        printResult(prime, 0, 0, begin);
+        //  计算并且打印总时间
         int status;
         pid_t wpid;
         while ((wpid = wait(&status)) > 0);
         clock_t now = clock();
         double time = (double)(now - begin) / CLOCKS_PER_SEC;
-        cout << "TotalTime: " << time << endl << endl;
+        cout << "TotalTime: " << time << endl;
     } else {
-
-        int index = mypool->getIndex();
         int* step = new int();
         int low_bound = total / (process_number + 1) * (index + 1) + total % (process_number + 1) + 1;
         int sub_range = total / (process_number + 1);
@@ -90,13 +84,13 @@ void primeSieve(int number) {
         // 和参数count比较，若返回值＜count，说明文件到了文件末尾，或读取过程中被信号中断了读取过程，
         // 有错误时返回－１；
 
-        while (1) {
+        while (true) {
             int size = read(mypool->getSubProcess()[index].getfiledes()[0], step, 4);
             if (size <= 0) break;
             //  需要找出的是第一个能被*step整除的数
-            int start = 0;
-            start = (low_bound / (*step)) * (*step) == low_bound ? low_bound : (low_bound / (*step)) * (*step) + (*step);
-            for (int i = start; i < low_bound + sub_range; i += *step)
+            int value = *step;
+            int start = (low_bound / value) * value == low_bound ? low_bound : (low_bound / value) * value + value;
+            for (int i = start; i < low_bound + sub_range; i += value)
                 nums[i - low_bound] = false;
         }
 
@@ -106,7 +100,9 @@ void primeSieve(int number) {
 }
 void printResult(vector<bool> nums, int index, int low_bound, int start) {
     int n = nums.size();
-    cout << "process " << index << ": ";
+    if (low_bound != 0) index += 1;
+    printf(" \033[40;31mprocess\033[0m ");
+    cout << index << ": ";
     for (int i = 0; i < n; i++) {
         if (nums[i])
             cout << i + low_bound << " ";
@@ -114,5 +110,10 @@ void printResult(vector<bool> nums, int index, int low_bound, int start) {
     cout << endl;
     clock_t now = clock();
     double time = (double)(now - start) / CLOCKS_PER_SEC;
-    cout << "TIME_COST: " << time << endl << endl;
+    if (low_bound != 0) {
+        printf("\033[40;32mTIME_COST\033[0m");
+        cout << " : " << time << endl << endl;
+    } else {
+        cout << endl;
+    }
 }
