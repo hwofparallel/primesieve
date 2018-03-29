@@ -16,18 +16,18 @@ ProcessPool::ProcessPool(int number) {
         clock_t beginTime;
         if (pid < 0) {
             cout << "error occurred when fork" << endl;
-        } else if (pid > 0) {
-            //  父进程，返回子进程的id
-            beginTime = clock();
-            sub_process[i].setId(pid);
-            index = i - number;
-            close(sub_process[i].getfiledes()[0]);
-        } else {
+        } else if (pid == 0) {
             //  子进程
             beginTime = clock();
             index = i;
             close(sub_process[i].getfiledes()[1]);
             break;
+        } else {
+            //  父进程，返回子进程的id
+            beginTime = clock();
+            sub_process[i].setId(pid);
+            index = i - number;
+            close(sub_process[i].getfiledes()[0]);
         } 
         sub_process[i].setBeginTime(beginTime);
     }
