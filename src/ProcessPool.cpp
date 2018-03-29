@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <iostream>
 #include "ProcessPool.h"
+using namespace std;
 
 ProcessPool::ProcessPool(int number) {
     process_number = number;
