@@ -1,46 +1,43 @@
 #include <unistd.h>
 #include <iostream>
-#include "../include/ProcessPool.h"
+#include "ProcessPool.h"
 
-ProcessPool* ProcessPool::instance = nullptr;
-
-ProcessPool::ProcessPool(int number) :process_number(number), index(-1) {
+ProcessPool::ProcessPool(int number) {
+    process_number = number;
+    index = -1;
     sub_process = new Process[number];
     for (int i = 0; i < number; i++) {
-        //为每一个进程创建一个管道
-        if (pipe(sub_process[i].getfds()) < 0) {
-            std::cerr << "pipe error";
+        //  为每一个进程创建一个管道，成功返回0,失败返回-1
+        if (pipe(sub_process[i].getfiledes()) < 0) {
+            cout << "error occurred when pipe!" << endl;
         }
-        pid_t pid;
-        pid = fork();
+	    //  使用fork创建子进程
+        pid_t pid = fork();
+        clock_t beginTime;
         if (pid < 0) {
-            std::cerr << "fork err\n";
+            cout << "error occurred when fork" << endl;
         } else if (pid > 0) {
-            //父亲进程
-            clock_t beginTime = clock();
+            //  父进程，返回子进程的id
+            beginTime = clock();
             sub_process[i].setId(pid);
-            sub_process[i].setBeginTime(beginTime);
             index = i - number;
-            close(sub_process[i].getfds()[0]);
+            close(sub_process[i].getfiledes()[0]);
         } else {
-            //子进程
-            clock_t beginTime = clock();
-            sub_process[i].setBeginTime(beginTime);
+            //  子进程
+            beginTime = clock();
             index = i;
-            close(sub_process[i].getfds()[1]);
-            //关于这里的break其实还是有疑问的
+            close(sub_process[i].getfiledes()[1]);
             break;
         } 
+        sub_process[i].setBeginTime(beginTime);
     }
+}
+
+ProcessPool* ProcessPool::createPool(int number) {
+    static ProcessPool instance(number);
+    return &instance;
 }
 
 ProcessPool::~ProcessPool() {
   delete []sub_process;
-}
-
-ProcessPool* ProcessPool::createPool(int number) {
-    if (instance == nullptr) {
-        instance = new ProcessPool(number);
-    }
-    return instance;
 }
