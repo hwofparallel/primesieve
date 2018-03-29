@@ -1,11 +1,15 @@
-prime : main.o ProcessPool.o
-	g++ main.o ProcessPool.o -o prime
+CC := g++
+FLAGS := -std=c++11 -w
 
-main.o :src/main.cpp
-	g++ -c src/main.cpp -o  main.o -std=c++11
-
-ProcessPool.o :src/ProcessPool.cpp
-	g++ -c src/ProcessPool.cpp -o  ProcessPool.o -std=c++11
-
+bin/primeSieve: build/ProcessPool.o build/main.o
+			@mkdir -p bin
+			$(CC) $(FLAGS) -I./include build/ProcessPool.o build/main.o -o $@
+build/ProcessPool.o: src/ProcessPool.cpp
+			@mkdir -p build
+			$(CC) $(FLAGS) -I./include -c -o $@ src/ProcessPool.cpp
+build/main.o: src/main.cpp
+			@mkdir -p build
+			$(CC) $(FLAGS) -I./include -c -o $@ src/main.cpp
 clean:
-	rm *.o
+	@rm -rf build
+	@rm -rf bin
