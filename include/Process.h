@@ -7,7 +7,6 @@ class Process {
 public:
 	Process() {
 		m_pid = -1;
-		beginTime = clock();
 	}
 	void setId(pid_t id) {
 		m_pid = id;
@@ -15,18 +14,18 @@ public:
 	void setBeginTime(clock_t time) {
 		beginTime = time;
 	}
-	int * getfds() {
-		return fds;	
+	int * getfiledes() {
+		return filedes;	
 	}
 	clock_t getBeginTime() {
-		return clock();
+		return beginTime;
 	}
 
 private:
 	pid_t m_pid;
 	// filedes[0] is to read pipe, filedes[1] is to write pipe
-	int fds[2];
+	int filedes[2];
 	int beginTime;
 };
-#endif // !PROCESS_H
+#endif
 
