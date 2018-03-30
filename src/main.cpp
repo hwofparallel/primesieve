@@ -101,9 +101,9 @@ void primeSieve(int number) {
     static ProcessPool* mypool = ProcessPool::createPool(process_number);
     int index = mypool->getIndex();
     if (index < 0) {
-      ParentProcessHdl(total, process_number, index, mypool);
+        ParentProcessHdl(total, process_number, index, mypool);
     } else {
-      ChildProcessHdl(total, process_number, index, mypool);
+        ChildProcessHdl(total, process_number, index, mypool);
     }
 }
 
@@ -121,7 +121,7 @@ void printResult(vector<bool> nums, int index, int low_bound, int start) {
     double time = (double)(now - start) / CLOCKS_PER_SEC;
     if (low_bound != 0) {
         printf("\033[40;32mTIME_COST\033[0m");
-        cout << " : " << time << endl << endl;
+        cout << " : " << time << "(sec)" << endl << endl;
     } else {
         cout << endl;
     }
