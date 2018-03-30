@@ -11,19 +11,21 @@
 using namespace std;
 
 void primeSieve(int number);
-void printResult(vector<bool> nums, int index, int low_bound, int start);
 void changeAllMultiples(vector<bool>& prime, int father_range, int process_number, ProcessPool* pool);
+void ParentProcessHdl(int total, int process_number, int index, ProcessPool* mypool);
+void ChildProcessHdl(int total, int process_number, int index, ProcessPool* mypool);
+void printResult(vector<bool> nums, int index, int low_bound, int start);
 
 int main() {
     int num;
     cout << "Please input the number between 0 and 9: ";
-    cin >> num;
     // num: 0 ~ 9
+    cin >> num;
     while (num < 0 || num > 9) {
         cout << "Please input the number between 0 and 9: ";
         cin >> num;
     }
-    primeSieve(num);
+    primeSieve((int)num);
     return 0;
 }
 
@@ -90,14 +92,16 @@ void ChildProcessHdl(int total, int process_number, int index, ProcessPool* mypo
         for (int i = start; i < low_bound + sub_range; i += value)
             nums[i - low_bound] = false;
     }
-
-    clock_t start = mypool -> getSubProcess()[index].getBeginTime();
+    clock_t start = mypool->getSubProcess()[index].getBeginTime();
     printResult(nums, index, low_bound, start);
 }
 
 void primeSieve(int number) {
     int total = pow(2, number) * 1000;
     int process_number = sqrt(total) / 2;
+    cout << "total num: " << total << endl;
+    cout << "process_number: " << process_number << endl;
+     
     static ProcessPool* mypool = ProcessPool::createPool(process_number);
     int index = mypool->getIndex();
     if (index < 0) {
